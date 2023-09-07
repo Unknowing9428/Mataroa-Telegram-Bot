@@ -34,7 +34,7 @@ users_data = {}
 API_URL = "https://mataroa.blog/api/posts/"
 
 # bot token 
-TOKEN = "bot_token_here"
+TOKEN = "6513735892:AAG_fnTs8jpxDYt3aEJnWQ4NxfDalKrww9o"
 
 # users.json path
 USERS_JSON_PATH = "users.json"
@@ -321,6 +321,7 @@ def list_posts(update, context):
         return
 
     context.user_data.clear()
+    # update.message.reply_text("✅ Ongoing conversation canceled. Here is the list of your blog posts:")
 
     api_key = users_data[user_id]["api_key"]
     
@@ -366,7 +367,7 @@ def main():
     conv_handler_start = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={ENTER_API_KEY: [MessageHandler(Filters.text & ~Filters.command, enter_api_key)]},
-        fallbacks=[],
+        fallbacks=[CommandHandler('cancel', cancel)],
     )
 
     conv_handler_post = ConversationHandler(
@@ -376,13 +377,13 @@ def main():
             ENTER_BODY: [MessageHandler(Filters.text & ~Filters.command, enter_body)],
             ENTER_PUBLISH_CHOICE: [MessageHandler(Filters.text & ~Filters.command, enter_publish_choice)],
         },
-        fallbacks=[],
+        fallbacks=[CommandHandler('cancel', cancel)],
     )
 
     conv_handler_delete = ConversationHandler(
         entry_points=[CommandHandler('delete', delete)],
         states={ENTER_DELETE_SLUG: [MessageHandler(Filters.text & ~Filters.command, enter_delete_slug)]},
-        fallbacks=[],
+        fallbacks=[CommandHandler('cancel', cancel)],
     )
 
     conv_handler_update = ConversationHandler(
@@ -393,7 +394,7 @@ def main():
             ENTER_UPDATED_BODY: [MessageHandler(Filters.text & ~Filters.command, enter_updated_body)],
             ENTER_PUBLISH_CHOICE_UPDATE: [MessageHandler(Filters.text & ~Filters.command, enter_publish_choice_update)],
         },
-        fallbacks=[],
+        fallbacks=[CommandHandler('cancel', cancel)],
     )
 
     dispatcher.add_handler(conv_handler_start)
