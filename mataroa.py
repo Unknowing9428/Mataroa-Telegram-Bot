@@ -321,7 +321,6 @@ def list_posts(update, context):
         return
 
     context.user_data.clear()
-    # update.message.reply_text("✅ Ongoing conversation canceled. Here is the list of your blog posts:")
 
     api_key = users_data[user_id]["api_key"]
     
