@@ -10,6 +10,8 @@ Markdown limited to
 `` `monospace` ``,  
 `# heading 1`, `## heading 2`, `### heading 3`
 
+Option to save as draft or publish now.
+
 You can find your API key [here](https://mataroa.blog/api/docs/).
 
 Not sure how capable it is in handling multiple users.
