@@ -16,6 +16,8 @@
 
 Recommended workflow: Write and submit posts in plain text through the bot. Save as drafts. Edit and publish on website if images and Markdown are needed. If not using images and Markdown, write and submit posts to be published immediately.
 
+tl;dr new posts easy, edit cumbersome
+
 Not sure how capable it is in handling multiple users since I have no way of testing it but it's there anyway.
 
 ## Usage
