@@ -12,5 +12,7 @@ Markdown limited to
 
 You can find your API key [here](https://mataroa.blog/api/docs/).
 
+Not sure how capable it is in handling multiple users.
+
 ## Usage
 🏃 Run mataroa.py in a Docker container
