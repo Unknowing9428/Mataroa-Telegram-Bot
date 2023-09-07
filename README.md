@@ -19,6 +19,6 @@ Not sure how capable it is in handling multiple users.
 ## Usage
 🏃 Run mataroa.py in a Docker container
 
-## Sreenshots
-![1](https://github.com/Unknowing9428/Mataroa-Telegram-Bot/assets/144300469/f65957e4-5ca2-4543-a7be-80dbc4e167b3)
-![2](https://github.com/Unknowing9428/Mataroa-Telegram-Bot/assets/144300469/d74fa2a2-f387-4583-b813-7397178d79b5)
+## Screenshots
+![266206715-f65957e4-5ca2-4543-a7be-80dbc4e167b3](https://github.com/Unknowing9428/Mataroa-Telegram-Bot/assets/144300469/a385b12e-931e-4d58-ac50-68f47fca90a8)
+![266206739-d74fa2a2-f387-4583-b813-7397178d79b5](https://github.com/Unknowing9428/Mataroa-Telegram-Bot/assets/144300469/844f1f50-2bf1-4e4c-978e-e6eccc2e83f4)
