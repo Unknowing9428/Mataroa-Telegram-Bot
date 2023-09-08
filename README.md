@@ -20,7 +20,7 @@ tl;dr new posts easy, edit cumbersome
 
 Not sure how capable it is in handling multiple users since I have no way of testing it but it's there anyway.
 
-[Mataroa.blog](https://mataroa.blog/)
+[Mataroa.blog](https://mataroa.blog/)  
 [mataroa repo](https://github.com/mataroa-blog/mataroa)
 
 ## Usage
