@@ -2,7 +2,7 @@
 
 👉 [@MataroaBlogBot](https://t.me/MataroaBlogBot)
 
-✍️ Quickly manage your Mataroa.blog with this bot. Create, update, delete, and list your blog posts with ease. Limited to text and emojis. No images.
+✍️ Quickly manage your [Mataroa.blog](https://mataroa.blog/) with this bot. Create, update, delete, and list your blog posts with ease. Limited to text and emojis. No images.
 
 📝Markdown limited to  
 `*italics*` or `_italics_`,  
@@ -19,6 +19,9 @@ Recommended workflow: Write and submit posts in plain text through the bot. Save
 tl;dr new posts easy, edit cumbersome
 
 Not sure how capable it is in handling multiple users since I have no way of testing it but it's there anyway.
+
+[Mataroa.blog](https://mataroa.blog/)
+[mataroa repo](https://github.com/mataroa-blog/mataroa)
 
 ## Usage
 🏃 Run mataroa.py in a Docker container
