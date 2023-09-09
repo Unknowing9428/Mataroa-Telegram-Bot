@@ -34,7 +34,7 @@ users_data = {}
 API_URL = "https://mataroa.blog/api/posts/"
 
 # bot token 
-TOKEN = "6513735892:AAG_fnTs8jpxDYt3aEJnWQ4NxfDalKrww9o"
+TOKEN = "bot_token_here"
 
 # users.json path
 USERS_JSON_PATH = "users.json"
