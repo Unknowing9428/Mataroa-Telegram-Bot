@@ -176,6 +176,13 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         response_data = response.json()
 
         if response.status_code in (200, 201) and response_data.get("ok"):
+            users_data[user_id].title = ''
+            users_data[user_id].body = ''
+            users_data[user_id].published_at = None
+
+            with open(USERS_JSON_PATH, "w") as user_file:
+                json.dump({k: v.__dict__ for k, v in users_data.items()}, user_file)
+
             if slug:
                 await query.edit_message_text(
                     f"✅ Your blog post '{title}' has been updated! 🛠️\n\n"
