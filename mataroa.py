@@ -36,6 +36,8 @@ API_URL = "https://mataroa.blog/api/posts/"
 
 TOKEN = "bot_token_here"
 
+users_data = {}
+
 USERS_JSON_PATH = "users.json"
 
 @dataclass
