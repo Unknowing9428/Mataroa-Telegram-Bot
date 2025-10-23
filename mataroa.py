@@ -8,7 +8,8 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional, Tuple, Set
 from enum import IntEnum
 import secrets
-
+from dotenv import load_dotenv
+load_dotenv()
 import httpx
 import aiofiles
 from json import JSONDecodeError
@@ -67,16 +68,14 @@ MESSAGES: Dict[str, str] = {
 
     # Start/Help/Status
     "START_WELCOME": "👋 Welcome to the Mataroa.blog bot! Please enter your API key.",
-    "API_SAVED": "✅ API key saved! Use /new, /update, /delete, /list, /drafts, /published, /search, /settings or /help.",
+    "API_SAVED": "✅ API key saved! Use /new, /update, /delete, /list, /search, /settings or /help. Tip: use /list published or /list drafts to filter.",
     "HELP_TEXT": (
         "🤖 Mataroa.blog Bot Help\n\n"
         "/start - Set your API key\n"
         "/new or /post - Create a new post (multi-message drafting: /done, /preview, /clear, /cancel)\n"
         "/update - Update an existing post\n"
         "/delete - Delete a post\n"
-        "/list - List your posts with filters & pagination\n"
-        "/drafts - List drafts only\n"
-        "/published - List published only\n"
+        "/list - List your posts with filters & pagination (use /list published or /list drafts)\n"
         "/search <query> - Search in titles and bodies\n"
         "/settings - Adjust default publish mode, preview length, confirm-delete\n"
         "/status - Check API connectivity\n"
@@ -168,7 +167,9 @@ MESSAGES: Dict[str, str] = {
     "FILTER_ALL": "All",
     "FILTER_PUBLISHED": "Published",
     "FILTER_DRAFTS": "Drafts",
-    "BUTTON_PAGE_X_OF_Y": "Page {page}/{total}",
+    "BUTTON_BACK_TO_LIST": "Back to list",
+    "BUTTON_PUBLISH": "Publish",
+    "BUTTON_UNPUBLISH": "Unpublish",
     # Settings additions
     "SETTINGS_HEADER": "⚙️ Settings",
     "BUTTON_TOGGLE_DEFAULT_MODE": "Toggle Default Publish Mode",
@@ -193,7 +194,6 @@ CB_TOGGLEPUB_PREFIX = "togglepub:"
 CB_LIST_PREFIX = "list:"
 CB_LIST_FILTER_PREFIX = "list:filter:"
 CB_LIST_PAGE_PREFIX = "list:page:"
-CB_LIST_NOP = "list:nop"
 CB_LIST_REFRESH = "list:refresh"
 CB_CONFIRM_DELETE = "confirm_delete"
 CB_UNDO_DELETE_PREFIX = "undodel:"
@@ -923,25 +923,27 @@ def list_nav_keyboard(
     btns.append(
         [
             InlineKeyboardButton(
-                f"{MESSAGES['FILTER_ALL']}{'✓' if filter_mode=='all' else ''}", callback_data=f"{CB_LIST_FILTER_PREFIX}all"
+                f"{MESSAGES['FILTER_ALL']}{' ✓' if filter_mode=='all' else ''}", callback_data=f"{CB_LIST_FILTER_PREFIX}all"
             ),
             InlineKeyboardButton(
-                f"{MESSAGES['FILTER_PUBLISHED']}{'✓' if filter_mode=='published' else ''}",
+                f"{MESSAGES['FILTER_PUBLISHED']}{' ✓' if filter_mode=='published' else ''}",
                 callback_data=f"{CB_LIST_FILTER_PREFIX}published",
             ),
             InlineKeyboardButton(
-                f"{MESSAGES['FILTER_DRAFTS']}{'✓' if filter_mode=='drafts' else ''}", callback_data=f"{CB_LIST_FILTER_PREFIX}drafts"
+                f"{MESSAGES['FILTER_DRAFTS']}{' ✓' if filter_mode=='drafts' else ''}", callback_data=f"{CB_LIST_FILTER_PREFIX}drafts"
             ),
         ]
     )
     # Paging
     nav = []
     if page > 1:
-        nav.append(InlineKeyboardButton(MESSAGES["BUTTON_PREV"], callback_data=f"{CB_LIST_PAGE_PREFIX}prev"))
-    nav.append(InlineKeyboardButton(MESSAGES["BUTTON_PAGE_X_OF_Y"].format(page=page, total=total_pages), callback_data=CB_LIST_NOP))
+        prev_label = f"{MESSAGES['BUTTON_PREV']} ({page}/{total_pages})"
+        nav.append(InlineKeyboardButton(prev_label, callback_data=f"{CB_LIST_PAGE_PREFIX}prev"))
     if page < total_pages:
-        nav.append(InlineKeyboardButton(MESSAGES["BUTTON_NEXT"], callback_data=f"{CB_LIST_PAGE_PREFIX}next"))
-    btns.append(nav)
+        next_label = f"{MESSAGES['BUTTON_NEXT']} ({page}/{total_pages})"
+        nav.append(InlineKeyboardButton(next_label, callback_data=f"{CB_LIST_PAGE_PREFIX}next"))
+    if nav:
+        btns.append(nav)
     # Refresh
     btns.append([InlineKeyboardButton(MESSAGES["BUTTON_REFRESH"], callback_data=CB_LIST_REFRESH)])
     return btns
@@ -2233,28 +2235,6 @@ async def list_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await list_posts(update, context, filter_mode=arg)
 
 
-async def drafts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await ensure_allowed(update, context):
-        return
-    if not await ensure_private(update, context):
-        return
-    user_id = await ensure_api_key_or_prompt(update, context)
-    if not user_id:
-        return
-    await list_posts(update, context, filter_mode="drafts")
-
-
-async def published_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await ensure_allowed(update, context):
-        return
-    if not await ensure_private(update, context):
-        return
-    user_id = await ensure_api_key_or_prompt(update, context)
-    if not user_id:
-        return
-    await list_posts(update, context, filter_mode="published")
-
-
 async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await ensure_allowed(update, context):
         return
@@ -2306,8 +2286,6 @@ async def list_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if posts is None:
             await query.edit_message_text(MESSAGES["FAILED_FETCH_POSTS"])
             return
-    elif qd == CB_LIST_NOP:
-        pass
     elif qd.startswith(f"{CB_LIST_PREFIX}manage:"):
         tok = qd.split(":", 2)[2] if ":" in qd else ""
         slug = resolve_token_to_slug(context, user_id, tok) if tok else None
@@ -2332,12 +2310,12 @@ async def list_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton(MESSAGES["BUTTON_EDIT"], callback_data=f"{CB_EDIT_PREFIX}{tok2}"),
             InlineKeyboardButton(MESSAGES["BUTTON_DELETE"], callback_data=f"{CB_DELETE_PREFIX}{tok2}"),
         ])
-        toggle_label = "Unpublish" if is_pub else "Publish"
+        toggle_label = MESSAGES["BUTTON_UNPUBLISH"] if is_pub else MESSAGES["BUTTON_PUBLISH"]
         row2: List[InlineKeyboardButton] = [InlineKeyboardButton(toggle_label, callback_data=f"{CB_TOGGLEPUB_PREFIX}{tok2}")]
         if is_valid_absolute_url(url):
             row2.append(open_url_button(url))
         rows.append(row2)
-        rows.append([InlineKeyboardButton("Back to list", callback_data=f"{CB_LIST_PREFIX}back")])
+        rows.append([InlineKeyboardButton(MESSAGES["BUTTON_BACK_TO_LIST"], callback_data=f"{CB_LIST_PREFIX}back")])
         await query.edit_message_text(text, parse_mode="MarkdownV2", reply_markup=InlineKeyboardMarkup(rows), disable_web_page_preview=True)
         return
     elif qd == f"{CB_LIST_PREFIX}back":
@@ -2784,8 +2762,6 @@ def main():
     application.add_handler(conv_delete)
 
     application.add_handler(CommandHandler("list", list_command))
-    application.add_handler(CommandHandler("drafts", drafts_command))
-    application.add_handler(CommandHandler("published", published_command))
     application.add_handler(CommandHandler("search", search_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("cancel", cancel))
